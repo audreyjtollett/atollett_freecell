@@ -44,9 +44,13 @@ public class SolitaireInput : MonoBehaviour
                     }
                     // check if move is valid
                     // if valid, move card
-                    selectedCard.GetComponent<SpriteRenderer>().color = Color.white;
-                    selectedCard = null;
-                    return;
+                    if (solitaire.IsValidMove(selectedCard, hit.gameObject))
+                    {
+                        solitaire.PlaceCard(selectedCard, hit.gameObject);
+                        selectedCard.GetComponent<SpriteRenderer>().color = Color.white;
+                        selectedCard = null;
+                        return;
+                    }
                 }
                 // if face down, flip it
                 if (!hit.gameObject.GetComponent<CardSprite>().isFaceUp && solitaire.IsLastInTab(hit.gameObject))
@@ -69,10 +73,24 @@ public class SolitaireInput : MonoBehaviour
             if (hit.CompareTag("Tableau"))
             {
                 Debug.Log("Tableau clicked: " + hit.name);
+                if (solitaire.IsValidMove(selectedCard, hit.gameObject))
+                {
+                    solitaire.PlaceCard(selectedCard, hit.gameObject);
+                    selectedCard.GetComponent<SpriteRenderer>().color = Color.white;
+                    selectedCard = null;
+                    return;
+                }
             }
             if (hit.CompareTag("Foundation"))
             {
                 Debug.Log("Foundation clicked: " + hit.name);
+                if (solitaire.IsValidMove(selectedCard, hit.gameObject))
+                {
+                    solitaire.PlaceCard(selectedCard, hit.gameObject);
+                    selectedCard.GetComponent<SpriteRenderer>().color = Color.white;
+                    selectedCard = null;
+                    return;
+                }
             }
         }
     }

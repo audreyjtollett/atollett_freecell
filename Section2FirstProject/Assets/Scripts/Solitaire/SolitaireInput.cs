@@ -35,11 +35,15 @@ public class SolitaireInput : MonoBehaviour
                 if (selectedCard != null)
                 {
                     // check if valid move
-                    // make the move
-                    // deselect card
-                    selectedCard.GetComponent<SpriteRenderer>().color = Color.white;
-                    selectedCard = null;
-                    return;
+                    if (solitaire.IsValidMove(selectedCard, hit.gameObject))
+                    {
+                        // make the move
+                        solitaire.PlaceCard(selectedCard, hit.gameObject);
+                        // deselect card
+                        selectedCard.GetComponent<SpriteRenderer>().color = Color.white;
+                        selectedCard = null;
+                        return;
+                    }
                 }
                 if (!hit.gameObject.GetComponent<CardHandler>().isFaceUp && solitaire.IsLastInTab(hit.gameObject))
                 {
@@ -58,10 +62,30 @@ public class SolitaireInput : MonoBehaviour
             if (hit.gameObject.CompareTag("Foundation"))
             {
                 Debug.Log("foundation clicked: " + hit.name);
+                // check if valid move
+                if (solitaire.IsValidMove(selectedCard, hit.gameObject))
+                {
+                    // make the move
+                    solitaire.PlaceCard(selectedCard, hit.gameObject);
+                    // deselect card
+                    selectedCard.GetComponent<SpriteRenderer>().color = Color.white;
+                    selectedCard = null;
+                    return;
+                }
             }
             if (hit.gameObject.CompareTag("Tableau"))
             {
                 Debug.Log("tab clicked: " + hit.name);
+                // check if valid move
+                if (solitaire.IsValidMove(selectedCard, hit.gameObject))
+                {
+                    // make the move
+                    solitaire.PlaceCard(selectedCard, hit.gameObject);
+                    // deselect card
+                    selectedCard.GetComponent<SpriteRenderer>().color = Color.white;
+                    selectedCard = null;
+                    return;
+                }
             }
         }
     }

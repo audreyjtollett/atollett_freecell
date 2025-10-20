@@ -139,6 +139,7 @@ public class Solitaire : MonoBehaviour
             return;
         }
 
+        // need to reset x position for all cards not in the drawn set of 3
         int cardsToDraw = Math.Min(3, deck.Count);
         for (int i = 0; i < cardsToDraw; i++)
         {
@@ -148,6 +149,7 @@ public class Solitaire : MonoBehaviour
             CreateCard(card, wastePosition.transform.position + new Vector3(i * 0.3f, 0, zOffset), wastePosition.transform, true);
             zOffset -= .3f;
         }
+        
         Debug.Log("Deck count: " + deck.Count);
         if (deck.Count == 0)
         {
@@ -158,12 +160,90 @@ public class Solitaire : MonoBehaviour
 
     public bool IsValidMove(GameObject cardObject, GameObject targetObject)
     {
-        return true;
+        if (cardObject == targetObject || cardObject == null || targetObject == null) return false;
+        ResolveTarget(targetObject, out GameObject clickedTag, out int foundationIndex, out int tabIndex);
+
+        // waste -> tab/foundation
+        if (cardObject.transform.parent.CompareTag("Waste"))
+        {
+            if (clickedTag.transform.CompareTag("Tableau") && tabIndex >= 0)
+            {
+                Debug.Log("can place on tab: " + CanPlaceOnTableau(cardObject.name, tabIndex));
+                return CanPlaceOnTableau(cardObject.name, tabIndex);
+            }
+            if (clickedTag.transform.CompareTag("Foundation") && foundationIndex >= 0)
+            {
+                Debug.Log("can place on found: " + CanPlaceOnFoundation(cardObject.name, foundationIndex));
+                return CanPlaceOnFoundation(cardObject.name, foundationIndex);
+            }
+            return false;
+        }
+
+        // foundation -> tab
+        if (cardObject.transform.parent.CompareTag("Foundation"))
+        {
+            if (clickedTag.transform.CompareTag("Tableau") && tabIndex >= 0)
+            {
+                Debug.Log("can place on tab from found: " + CanPlaceOnTableau(cardObject.name, tabIndex));
+                return CanPlaceOnTableau(cardObject.name, tabIndex);
+            }
+            Debug.Log("bad found to tab click");
+            return false;
+        }
+
+        // tab -> tab/foundation
+        if (cardObject.transform.parent.CompareTag("Tableau"))
+        {
+            if (clickedTag.transform.CompareTag("Tableau") && tabIndex >= 0)
+            {
+                Debug.Log("can place on tab from tab: " + CanPlaceOnTableau(cardObject.name, tabIndex));
+                return CanPlaceOnTableau(cardObject.name, tabIndex);
+            }
+            if (clickedTag.transform.CompareTag("Foundation") && foundationIndex >= 0)
+            {
+                if (IsBlocked(cardObject))
+                {
+                    Debug.Log("Blocked from tab->tab/foundation");
+                    return false;
+                }
+                Debug.Log("can place on found from tab: " + CanPlaceOnFoundation(cardObject.name, tabIndex));
+                return CanPlaceOnFoundation(cardObject.name, foundationIndex);
+            }
+            Debug.Log("Bad tab to tab/found click");
+            return false;
+        }
+        Debug.Log("nothing matched. returning false");
+        return false;
     }
 
     public void PlaceCard(GameObject cardObject, GameObject targetObject)
     {
-        
+        if (cardObject == targetObject || cardObject == null || targetObject == null) return;
+        ResolveTarget(targetObject, out GameObject clickedTag, out int foundationIndex, out int tabIndex);
+        // if coming from tab, need to remove card and all cards on top of it from their original tab
+
+        if (cardObject.transform.parent.CompareTag("Waste"))
+        {
+            waste.Remove(cardObject.name);
+        }
+        // if coming from foundation, remove card from correct foundation
+
+        // if moving to tab, add the card to the correct tab
+        if (clickedTag.transform.CompareTag("Tableau"))
+        {
+            // add it to the right tab
+            int tableauIndex = System.Array.IndexOf(tableauPositions, clickedTag);
+            tableaus[tableauIndex].Add(cardObject.name);
+            // move the card position
+            if (tableaus[tableauIndex].Count == 1)
+                cardObject.transform.position = targetObject.transform.position + new Vector3(0f, 0f, -.03f);
+            else
+                cardObject.transform.position = targetObject.transform.position + cardOffset;
+            // update parent
+            cardObject.transform.parent = clickedTag.transform;
+            // move all other cards on top of the original cardObject (probably put this in a helper function)
+        }
+        // if moving to foundation, add card to correct foundation
     }
 
     public bool IsLastInTab(GameObject cardObject)
@@ -244,20 +324,12 @@ public class Solitaire : MonoBehaviour
 
     void ResolveTarget(GameObject toLocation, out GameObject clickedTag, out int foundationIndex, out int tableauIndex)
     {
-
-        // DO NOT USE THIS CODE, IT IS AUTO GENERATED
-        clickedTag = null;
+        clickedTag = toLocation.transform.CompareTag("Card") ? toLocation.transform.parent.gameObject : toLocation;
         foundationIndex = -1;
         tableauIndex = -1;
-        if (toLocation.CompareTag("Foundation"))
-        {
-            clickedTag = toLocation;
-            foundationIndex = Array.IndexOf(foundationPositions, toLocation);
-        }
-        else if (toLocation.CompareTag("Tableau"))
-        {
-            clickedTag = toLocation;
-            tableauIndex = Array.IndexOf(tableauPositions, toLocation);
-        }
+        if (clickedTag.transform.CompareTag("Foundation"))
+            foundationIndex = System.Array.IndexOf(foundationPositions, clickedTag);
+        else if (clickedTag.transform.CompareTag("Tableau"))
+            tableauIndex = System.Array.IndexOf(tableauPositions, clickedTag);
     }
 }
