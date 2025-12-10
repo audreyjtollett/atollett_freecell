@@ -6,4 +6,8 @@ Cards can move:
                 - To a free cell (if empty)
                 - To another tableau pile (alternating color, one rank lower)
                 - Or to a foundation pile (same suit, one rank higher)
-There is also a super beautiful main menu, and a reset button for during the game and after if you win.
+There is also a super beautiful main menu, and a reset button for during the game and after if you win. There are some issues with mistake clicks leaving things highlighted.
+
+[Github Repo] (https://github.com/audreyjtollett/atollett_freecell/tree/main/Assets/Scenes) (I forked the in class repo)
+[Itch.io] (https://audreyjtollett.itch.io/free-cell-solitaire)
+
